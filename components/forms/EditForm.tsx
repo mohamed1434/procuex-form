@@ -2,17 +2,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import InputField from "../form-fields/InputField";
-import SelectField from "../form-fields/SelectField";
 import RadioField from "../form-fields/RadioField";
 import { FormData, schema } from "@/validations/edit-form-validation";
 import TextAreaField from "../form-fields/TextAreaField";
 import CopyTag from "../CopyTag";
 import DateField from "../form-fields/DateField";
 import Spinner from "../Spinner";
+import CustomSelect from "../form-fields/CustomSelect";
+import ChipSelector from "../form-fields/ChipSelector";
+import { useTheme } from "@/context/ThemeContext";
 
 const countryOptions = ["Kuwait", "Lebanon", "India", "Russia", "Bahrain"];
-
-const categoryOptions = ["Kuwait", "Lebanon", "India", "Russia", "Bahrain"];
 
 export default function EditForm() {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -21,20 +21,25 @@ export default function EditForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, defaultValues },
+    formState: { errors, isSubmitting },
     getValues,
     setValue,
+    watch,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       requestName: "Prefilled Request Name",
       country: "Kuwait",
-      openingDate: new Date("2023-10-22").toISOString().split("T")[0],
+      //@ts-ignore
+      openingDate: new Date("2023-10-26").toISOString().split("T")[0],
+      //@ts-ignore
       submissionClosingDate: new Date("2023-10-30").toISOString().split("T")[0],
+      //@ts-ignore
       reviewDate: new Date("2023-10-30").toISOString().split("T")[0],
+      //@ts-ignore
       selectionDate: new Date("2023-10-30").toISOString().split("T")[0],
       category: "Kuwait",
-      subCategory: "Kuwait",
+      subCategory: ["Kuwait", "Lebanon"],
       radioOptions: "Third Level",
       description: "Android Application for booking hotels",
       summary: "Android Application for booking hotels",
@@ -58,6 +63,11 @@ export default function EditForm() {
   const openingDate = getValues("openingDate");
   const reviewDate = getValues("reviewDate");
   const isPublicLinkProtected = getValues("isPublicLinkProtected");
+
+  const selectedCountry = watch("country");
+  const selectedCategory = watch("category");
+  const selectedChips = watch("subCategory");
+  const { color } = useTheme();
 
   const handleClick = () => {
     setValue("isPublicLinkProtected", !isPublicLinkProtected, {
@@ -86,13 +96,16 @@ export default function EditForm() {
               error={errors.requestName?.message}
               isEditMode={isEditMode}
             />
-            <SelectField
-              label="Country of Supply"
-              name="country"
-              register={register}
-              error={errors.country?.message}
+            <CustomSelect
               items={countryOptions}
+              label={"Country of Supply"}
+              onChange={(option) => {
+                setValue("country", option ? option : "");
+              }}
               isEditMode={isEditMode}
+              name="country"
+              error={errors.country?.message}
+              value={selectedCountry}
             />
           </div>
 
@@ -137,21 +150,27 @@ export default function EditForm() {
           </div>
 
           <div className="w-full flex flex-col md:flex-row items-center justify-center gap-4">
-            <SelectField
-              label="Cateogry"
+            <CustomSelect
+              items={countryOptions}
+              label={"Cateogry"}
+              onChange={(option) => {
+                setValue("category", option ? option : "");
+              }}
+              isEditMode={isEditMode}
               name="category"
-              register={register}
               error={errors.category?.message}
-              items={categoryOptions}
-              isEditMode={isEditMode}
+              value={selectedCategory}
             />
-            <SelectField
-              label="Sub Cateogry"
-              name="subCategory"
-              register={register}
-              error={errors.subCategory?.message}
-              items={categoryOptions}
+            <ChipSelector
+              items={countryOptions}
+              label="Sub Category"
+              onChange={(option) => {
+                setValue("subCategory", option ? option : []);
+              }}
               isEditMode={isEditMode}
+              name="Sub Category"
+              error={errors.subCategory?.message}
+              value={selectedChips}
             />
           </div>
           <div className="flex flex-col items-start md:items-center md:flex-row  justify-start gap-6 w-full">
@@ -185,7 +204,7 @@ export default function EditForm() {
             )}
           </div>
 
-          <div className="flex flex-col border-2 border-[#E2E5E8] w-full rounded-lg p-4 gap-2">
+          <div className="flex flex-col border border-[#E2E5E8] w-full rounded-lg p-4 gap-2">
             <div className="flex items-center gap-2">
               <h1 className="text-[14px]">Enable Public Link</h1>
               <div className="inline-flex items-center">
@@ -215,6 +234,7 @@ export default function EditForm() {
                       disabled={!isEditMode}
                       onClick={handleClick}
                       checked={isPublicLinkProtected}
+                      className={`accent-primary theme-${color} theme-light`}
                     />
                     <h1 className="text-[14px]">
                       Is The Public Link Protected ?
@@ -264,12 +284,12 @@ export default function EditForm() {
             isEditMode={isEditMode}
           />
         </div>
-        <div className="w-full flex items-center justify-end">
+        <div className="w-full flex items-center justify-end px-6">
           {isEditMode && (
             <button
               disabled={isSubmitting}
               type="submit"
-              className="py-2 px-10 bg-blue-700 dark:bg-pink-500 transition-colors duration-300 ease-in-out rounded-lg text-white"
+              className={`py-2 px-10 bg-primary theme-${color} theme-light transition-colors duration-300 ease-in-out rounded-lg text-white`}
             >
               Save and Proceed
             </button>
@@ -277,9 +297,9 @@ export default function EditForm() {
         </div>
       </form>
       {!isEditMode && (
-        <div className="w-full flex justify-end items-center">
+        <div className="w-full flex justify-end items-center px-6">
           <button
-            className="py-2 px-10 bg-blue-700 dark:bg-pink-500 transition-colors duration-300 ease-in-out rounded-lg text-white"
+            className={`py-2 px-10 bg-primary theme-${color} theme-light transition-colors duration-300 ease-in-out rounded-lg text-white`}
             onClick={() => setIsEditMode(true)}
           >
             Edit

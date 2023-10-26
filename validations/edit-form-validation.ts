@@ -24,17 +24,16 @@ export const schema = z
       .string()
       .trim()
       .nonempty({ message: "Country of Supply is Required" }),
-    openingDate: z.coerce
-      .date()
-      .min(yesterday, { message: "Date must be greater than yesterday's date" }),
+    openingDate: z.coerce.date().min(yesterday, {
+      message: "Date must be greater than yesterday's date",
+    }),
     submissionClosingDate: z.coerce.date(),
     reviewDate: z.coerce.date(),
     selectionDate: z.coerce.date(),
     category: z.string().trim().nonempty({ message: "Category is Required" }),
     subCategory: z
-      .string()
-      .trim()
-      .nonempty({ message: "Sub Category is Required" }),
+    .array(z.string())
+    .min(1, { message: "Choose at least one option" }),
     radioOptions: z.string(),
     description: z
       .string()
@@ -43,8 +42,7 @@ export const schema = z
       .string()
       .min(10, { message: "Summary should be at least 10 characters." }),
     isPublicLinkProtected: z.boolean(),
-    publicLinkPassword: z
-      .string()
+    publicLinkPassword: z.string(),
   })
   .refine((data) => data.submissionClosingDate > data.openingDate, {
     message: "Submission Date should be greater than Opening Date",

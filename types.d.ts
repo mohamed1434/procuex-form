@@ -34,15 +34,25 @@ interface RadioFieldProps {
   isChecked?: boolean;
   isEditMode: boolean;
   defaultValue?: string;
-  //   items: any;
 }
 
-interface SelectFieldProps {
+interface CustomSelectFieldProps {
   label: string;
   name: string;
-  //   type: string;
-  register: UseFormRegister<any>;
   error?: string;
   items: string[];
+  value: string;
   isEditMode: boolean;
+  onChange: (value: string) => void;
 }
+
+type ChipFieldProps = {
+  label: string;
+  isEditMode: boolean;
+  items: string[];
+  name: string;
+  onChange: (value: string[]) => void;
+  value: string[];
+  error?: string;
+  multiple?: boolean;
+};
